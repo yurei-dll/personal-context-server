@@ -1,0 +1,26 @@
+{
+  "name": "personal-context-server",
+  "version": "1.0.0",
+  "description": "A personalized context-driven MCP archive server",
+  "main": "node dist/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yurei-dll/personal-context-server.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yurei-dll/personal-context-server/issues"
+  },
+  "homepage": "https://github.com/yurei-dll/personal-context-server#readme",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.3"
+  }
+}

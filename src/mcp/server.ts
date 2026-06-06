@@ -6,21 +6,24 @@ export function createServer() {
         version: "0.1.0",
     });
 
-    server.tool(
+    server.registerTool(
         "ping",
-        "Returns pong",
-        {},
+        {
+            description: "Returns pong."
+        },
         async () => {
             return {
                 content: [
                     {
                         type: "text",
-                        text: "pong",
+                        text: "Pong!",
                     },
                 ],
             };
         }
     );
+
+
 
     return server;
 }

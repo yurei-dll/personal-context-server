@@ -21,10 +21,12 @@
   "homepage": "https://github.com/yurei-dll/personal-context-server#readme",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
+    "pg": "^8.21.0",
     "tsc": "^2.0.4",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/pg": "^8.20.0",
     "typescript": "^6.0.3"
   }
 }

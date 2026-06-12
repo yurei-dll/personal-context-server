@@ -67,7 +67,7 @@ To get started, paste this into your MCP config:
   - [x] `list_recent_context(limit?)`
 - [x] Build SQL database and connect to exposed tools
 - [ ] Build and expose `metadata` tool that returns db info
-- [ ] Branch the tool functions from `db.ts` into `tools.ts`
+- [x] Branch the tool functions from `db.ts` into `tools.ts`
 - [ ] Build database housekeeping functions into `db.ts`
 
 ### File structure

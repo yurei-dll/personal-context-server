@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { listRecentContext, saveContext, searchContext } from "../storage/db.js";
+import { listRecentContext, saveContext, searchContext } from "./tools.js";
 
 export function createServer() {
     const server = new McpServer({

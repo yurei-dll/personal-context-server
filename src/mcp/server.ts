@@ -1,33 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-
-function save_context(text: string, tags?: string[], source?: string) {
-    return {
-        text,
-        tags: tags ?? [],
-        source,
-    };
-}
-
-function search_context(query: string, limit?: number) {
-    const resultLimit = limit ?? 20;
-
-    return {
-        query,
-        limit: resultLimit,
-        results: [],
-    };
-}
-
-function list_recent_context(limit?: number) {
-    const resultLimit = limit ?? 20;
-
-    return {
-        limit: resultLimit,
-        results: [],
-    };
-}
-
+import { listRecentContext, saveContext, searchContext } from "../storage/db.js";
 
 export function createServer() {
     const server = new McpServer({
@@ -63,13 +36,13 @@ export function createServer() {
             },
         },
         async ({ text, tags, source }) => {
-            const context = save_context(text, tags, source);
+            const context = await saveContext(text, tags, source);
 
             return {
                 content: [
                     {
                         type: "text",
-                        text: `Saved context: ${JSON.stringify(context)}`,
+                        text: JSON.stringify({ saved: context }),
                     },
                 ],
             };
@@ -86,13 +59,17 @@ export function createServer() {
             },
         },
         async ({ query, limit }) => {
-            const results = search_context(query, limit);
+            const results = await searchContext(query, limit);
 
             return {
                 content: [
                     {
                         type: "text",
-                        text: JSON.stringify(results),
+                        text: JSON.stringify({
+                            query,
+                            limit: limit ?? 20,
+                            results,
+                        }),
                     },
                 ],
             };
@@ -108,13 +85,16 @@ export function createServer() {
             },
         },
         async ({ limit }) => {
-            const results = list_recent_context(limit);
+            const results = await listRecentContext(limit);
 
             return {
                 content: [
                     {
                         type: "text",
-                        text: JSON.stringify(results),
+                        text: JSON.stringify({
+                            limit: limit ?? 20,
+                            results,
+                        }),
                     },
                 ],
             };

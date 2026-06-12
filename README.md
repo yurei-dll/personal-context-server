@@ -61,14 +61,75 @@ To get started, paste this into your MCP config:
 ## Roadmap
 
 - [x] Build basic MCP server
-- [x] Build and expose tools
+- [x] Build and expose basic tools
   - [x] `save_context(text, tags?, source?)`
   - [x] `search_context(query, limit?)`
   - [x] `list_recent_context(limit?)`
+  - [x] `database_metadata()`
 - [x] Build SQL database and connect to exposed tools
-- [ ] Build and expose `metadata` tool that returns db info
-- [ ] Branch the tool functions from `db.ts` into `tools.ts`
-- [ ] Build database housekeeping functions into `db.ts`
+- [x] Build and expose `database_metadata` tool that returns db info
+- [x] Branch the tool functions from `db.ts` into `tools.ts`
+- [ ] Add new function in `db.ts` to purge super old entries after db init
+- [ ] Add housekeeping tools
+  - [x] `database_metadata()`
+  - [x] `delete_context(id)`
+  - [ ] `update_context(id, text?, tags?, source?)`
+  - [ ] `vacuum_database()` / maintenance helper
+- [ ] Add embedding-based semantic search
+  - [ ] Generate embeddings for saved contexts
+  - [ ] Store vectors in `embeddings`
+  - [ ] Search by semantic similarity
+
+## Available tools
+
+| Tool | Usage | Result |
+| --- | --- | --- |
+| `ping` | Health check for the MCP server. Takes no arguments. | Text response: `Pong!` |
+| `save_context` | Save a new personal context note. Arguments: `text` (required string), `tags` (optional string array), `source` (optional string). | JSON text containing `{ "saved": context }`, where `context` is the saved record. |
+| `search_context` | Search saved context by text. Arguments: `query` (required string), `limit` (optional positive integer, defaults to `20`, capped at `100`). Searches content, source, and tags. | JSON text containing `{ "query": string, "limit": number, "results": context[] }`, ordered newest first. |
+| `list_recent_context` | Fetch recently saved context notes. Arguments: `limit` (optional positive integer, defaults to `20`, capped at `100`). | JSON text containing `{ "limit": number, "results": context[] }`, ordered newest first. |
+| `database_metadata` | Fetch simple database metadata. Takes no arguments. | JSON text containing row count, total database size, and table sizes for `contexts` and `embeddings`. |
+| `delete_context` | Delete a saved context note. Arguments: `id` (required positive integer). | JSON text containing `{ "id": number, "deleted": context \| null }`, where `deleted` is the removed record or `null` if no record matched. |
+
+`database_metadata` returns a shape like this:
+
+```json
+{
+  "metadata": {
+    "context_count": 3,
+    "total_size": {
+      "bytes": 2147483648,
+      "pretty": "2048 MB"
+    },
+    "tables": {
+      "contexts": {
+        "bytes": 32768,
+        "pretty": "32 kB"
+      },
+      "embeddings": {
+        "bytes": 8192,
+        "pretty": "8192 bytes"
+      }
+    }
+  }
+}
+```
+
+Context records returned by the tools look like this:
+
+```json
+{
+  "id": 1,
+  "kind": "note",
+  "content": "User has been building an MCP server this week.",
+  "source": "chat",
+  "tags": ["mcp", "project"],
+  "created_at": "2026-06-12T15:00:00.000Z",
+  "updated_at": "2026-06-12T15:00:00.000Z"
+}
+```
+
+## Dev references
 
 ### File structure
 

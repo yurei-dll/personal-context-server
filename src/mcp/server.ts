@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { listRecentContext, saveContext, searchContext } from "../storage/db.js";
+import { deleteContext, getDatabaseMetadata, listRecentContext, saveContext, searchContext } from "./tools.js";
 
 export function createServer() {
     const server = new McpServer({
@@ -101,6 +101,49 @@ export function createServer() {
         }
     );
 
+    server.registerTool(
+        "database_metadata",
+        {
+            description: "Return simple database metadata, including saved context count and storage sizes.",
+        },
+        async () => {
+            const metadata = await getDatabaseMetadata();
+
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: JSON.stringify({ metadata }),
+                    },
+                ],
+            };
+        }
+    );
+
+    server.registerTool(
+        "delete_context",
+        {
+            description: "Delete a saved personal context item by id.",
+            inputSchema: {
+                id: z.number().int().positive().describe("The id of the context item to delete."),
+            },
+        },
+        async ({ id }) => {
+            const deleted = await deleteContext(id);
+
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: JSON.stringify({
+                            id,
+                            deleted,
+                        }),
+                    },
+                ],
+            };
+        }
+    );
 
     return server;
 }

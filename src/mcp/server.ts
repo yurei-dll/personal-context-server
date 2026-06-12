@@ -104,7 +104,7 @@ export function createServer() {
     server.registerTool(
         "database_metadata",
         {
-            description: "Return simple database metadata, including saved context count.",
+            description: "Return simple database metadata, including saved context count and storage sizes.",
         },
         async () => {
             const metadata = await getDatabaseMetadata();

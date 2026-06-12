@@ -20,6 +20,16 @@ type ContextRow = {
     updated_at: string | Date;
 };
 
+type DatabaseMetadataRow = {
+    context_count: string;
+    total_size_bytes: string;
+    total_size_pretty: string;
+    contexts_size_bytes: string;
+    contexts_size_pretty: string;
+    embeddings_size_bytes: string;
+    embeddings_size_pretty: string;
+};
+
 const DEFAULT_CONTEXT_LIMIT = 20;
 const MAX_CONTEXT_LIMIT = 100;
 let tagsColumnType: string | undefined;
@@ -151,14 +161,35 @@ export async function listRecentContext(limit?: number) {
 export async function getDatabaseMetadata() {
     await initializeDatabase();
 
-    const result = await db.query<{ context_count: string }>(
+    const result = await db.query<DatabaseMetadataRow>(
         `
-            SELECT COUNT(*) AS context_count
-            FROM contexts
+            SELECT
+                (SELECT COUNT(*) FROM contexts) AS context_count,
+                pg_database_size(current_database()) AS total_size_bytes,
+                pg_size_pretty(pg_database_size(current_database())) AS total_size_pretty,
+                pg_total_relation_size('contexts') AS contexts_size_bytes,
+                pg_size_pretty(pg_total_relation_size('contexts')) AS contexts_size_pretty,
+                pg_total_relation_size('embeddings') AS embeddings_size_bytes,
+                pg_size_pretty(pg_total_relation_size('embeddings')) AS embeddings_size_pretty
         `
     );
+    const row = result.rows[0];
 
     return {
-        context_count: Number(result.rows[0]?.context_count ?? 0),
+        context_count: Number(row?.context_count ?? 0),
+        total_size: {
+            bytes: Number(row?.total_size_bytes ?? 0),
+            pretty: row?.total_size_pretty ?? "0 bytes",
+        },
+        tables: {
+            contexts: {
+                bytes: Number(row?.contexts_size_bytes ?? 0),
+                pretty: row?.contexts_size_pretty ?? "0 bytes",
+            },
+            embeddings: {
+                bytes: Number(row?.embeddings_size_bytes ?? 0),
+                pretty: row?.embeddings_size_pretty ?? "0 bytes",
+            },
+        },
     };
 }

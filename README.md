@@ -35,7 +35,11 @@ To get started, paste this into your MCP config:
     "/PATH/TO/THIS/REPO/src/index.ts"
   ],
   "command": "tsx",
-  "env": {},
+  "env": {
+    "PGHOST": "/var/run/postgresql",
+    "PGDATABASE": DATABASE_NAME,
+    "PGUSER": USERNAME
+  },
   "type": "stdio"
 }
 ```
@@ -44,9 +48,9 @@ To get started, paste this into your MCP config:
 
 - [x] Build basic MCP server
 - [ ] Build and expose tools
-  - [ ] `save_context(text, tags?, source?)`
+  - [x] `save_context(text, tags?, source?)`
   - [ ] `search_context(query, limit?)`
-  - [ ] `list_recent_context(limit?)`
+  - [x] `list_recent_context(limit?)`
 - [ ] Build SQL database and connect to exposed tools
 - To be continued...
 

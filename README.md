@@ -79,7 +79,7 @@ To get started, paste this into your MCP config:
 | `save_context` | Save a new personal context note. Arguments: `text` (required string), `tags` (optional string array), `source` (optional string). | JSON text containing `{ "saved": context }`, where `context` is the saved record. |
 | `search_context` | Search saved context by text. Arguments: `query` (required string), `limit` (optional positive integer, defaults to `20`, capped at `100`). Searches content, source, and tags. | JSON text containing `{ "query": string, "limit": number, "results": context[] }`, ordered newest first. |
 | `list_recent_context` | Fetch recently saved context notes. Arguments: `limit` (optional positive integer, defaults to `20`, capped at `100`). | JSON text containing `{ "limit": number, "results": context[] }`, ordered newest first. |
-| `database_metadata` | Fetch simple database metadata. Takes no arguments. | JSON text containing row count, total database size, and table sizes for `contexts` and `embeddings`. Example: `{ "metadata": { "context_count": 3, "total_size": { "bytes": 2147483648, "pretty": "2048 MB" }, "tables": { "contexts": { "bytes": 32768, "pretty": "32 kB" }, "embeddings": { "bytes": 8192, "pretty": "8192 bytes" } } } }`. |
+| `database_metadata` | Fetch simple database metadata. Takes no arguments. | JSON text containing row count, total database size, and table sizes for `contexts` and `embeddings`. |
 
 `database_metadata` returns a shape like this:
 

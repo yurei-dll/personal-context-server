@@ -218,6 +218,17 @@ export async function initializeDatabase() {
             vector TEXT
         )
     `);
+
+    // Add indexes TODO: Test this part specifically
+    await db.query(`
+      CREATE INDEX IF NOT EXISTS contexts_created_at_idx
+      ON contexts(created_at DESC, id DESC)
+    `);
+
+    await db.query(`
+      CREATE INDEX IF NOT EXISTS contexts_tags_idx
+      ON contexts USING GIN(tags)
+    `);
 }
 
 export async function saveContext(text: string, tags?: string[], source?: string) {

@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { listRecentContext, saveContext, searchContext } from "./tools.js";
+import { getDatabaseMetadata, listRecentContext, saveContext, searchContext } from "./tools.js";
 
 export function createServer() {
     const server = new McpServer({
@@ -95,6 +95,25 @@ export function createServer() {
                             limit: limit ?? 20,
                             results,
                         }),
+                    },
+                ],
+            };
+        }
+    );
+
+    server.registerTool(
+        "database_metadata",
+        {
+            description: "Return simple database metadata, including saved context count.",
+        },
+        async () => {
+            const metadata = await getDatabaseMetadata();
+
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: JSON.stringify({ metadata }),
                     },
                 ],
             };

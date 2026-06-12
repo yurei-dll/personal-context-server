@@ -147,3 +147,18 @@ export async function listRecentContext(limit?: number) {
 
     return result.rows.map(mapContextRow);
 }
+
+export async function getDatabaseMetadata() {
+    await initializeDatabase();
+
+    const result = await db.query<{ context_count: string }>(
+        `
+            SELECT COUNT(*) AS context_count
+            FROM contexts
+        `
+    );
+
+    return {
+        context_count: Number(result.rows[0]?.context_count ?? 0),
+    };
+}

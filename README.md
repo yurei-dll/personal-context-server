@@ -65,8 +65,9 @@ To get started, paste this into your MCP config:
   - [x] `save_context(text, tags?, source?)`
   - [x] `search_context(query, limit?)`
   - [x] `list_recent_context(limit?)`
+  - [x] `database_metadata()`
 - [x] Build SQL database and connect to exposed tools
-- [ ] Build and expose `metadata` tool that returns db info
+- [x] Build and expose `database_metadata` tool that returns db info
 - [x] Branch the tool functions from `db.ts` into `tools.ts`
 - [ ] Build database housekeeping functions into `db.ts`
 
@@ -78,6 +79,7 @@ To get started, paste this into your MCP config:
 | `save_context` | Save a new personal context note. Arguments: `text` (required string), `tags` (optional string array), `source` (optional string). | JSON text containing `{ "saved": context }`, where `context` is the saved record. |
 | `search_context` | Search saved context by text. Arguments: `query` (required string), `limit` (optional positive integer, defaults to `20`, capped at `100`). Searches content, source, and tags. | JSON text containing `{ "query": string, "limit": number, "results": context[] }`, ordered newest first. |
 | `list_recent_context` | Fetch recently saved context notes. Arguments: `limit` (optional positive integer, defaults to `20`, capped at `100`). | JSON text containing `{ "limit": number, "results": context[] }`, ordered newest first. |
+| `database_metadata` | Fetch simple database metadata. Takes no arguments. | JSON text containing `{ "metadata": { "context_count": number } }`. |
 
 Context records returned by the tools look like this:
 

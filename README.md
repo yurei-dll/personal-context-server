@@ -70,6 +70,31 @@ To get started, paste this into your MCP config:
 - [x] Branch the tool functions from `db.ts` into `tools.ts`
 - [ ] Build database housekeeping functions into `db.ts`
 
+## Available tools
+
+| Tool | Usage | Result |
+| --- | --- | --- |
+| `ping` | Health check for the MCP server. Takes no arguments. | Text response: `Pong!` |
+| `save_context` | Save a new personal context note. Arguments: `text` (required string), `tags` (optional string array), `source` (optional string). | JSON text containing `{ "saved": context }`, where `context` is the saved record. |
+| `search_context` | Search saved context by text. Arguments: `query` (required string), `limit` (optional positive integer, defaults to `20`, capped at `100`). Searches content, source, and tags. | JSON text containing `{ "query": string, "limit": number, "results": context[] }`, ordered newest first. |
+| `list_recent_context` | Fetch recently saved context notes. Arguments: `limit` (optional positive integer, defaults to `20`, capped at `100`). | JSON text containing `{ "limit": number, "results": context[] }`, ordered newest first. |
+
+Context records returned by the tools look like this:
+
+```json
+{
+  "id": 1,
+  "kind": "note",
+  "content": "User has been building an MCP server this week.",
+  "source": "chat",
+  "tags": ["mcp", "project"],
+  "created_at": "2026-06-12T15:00:00.000Z",
+  "updated_at": "2026-06-12T15:00:00.000Z"
+}
+```
+
+## Dev references
+
 ### File structure
 
 ```bash

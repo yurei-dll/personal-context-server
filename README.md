@@ -37,8 +37,8 @@ To get started, paste this into your MCP config:
   "command": "tsx",
   "env": {
     "PGHOST": "/var/run/postgresql",
-    "PGDATABASE": DATABASE_NAME,
-    "PGUSER": USERNAME
+    "PGDATABASE": "DATABASE_NAME",
+    "PGUSER": "USERNAME"
   },
   "type": "stdio"
 }

@@ -26,6 +26,20 @@ Together, the LLM gains both long-term preferences and recent context _between c
 
 ---
 
+The full LLM runtime situation should look something like this:
+
+<p align=center>User prompt</p>
+<p align=center>↓</p>
+<p align=center>Conversation context</p>
+<p align=center>↓</p>
+<p align=center>System prompt</p>
+<p align=center>↓</p>
+<p align=center>Long-term static memories of user preferences, etc.</p>
+<p align=center>↓</p>
+<p align=center><b>This MCP layer</b> to fetch recent or trending context outside the current conversation</p>
+
+---
+
 To get started, paste this into your MCP config:
 
 ```json
@@ -47,26 +61,14 @@ To get started, paste this into your MCP config:
 ## Roadmap
 
 - [x] Build basic MCP server
-- [ ] Build and expose tools
+- [x] Build and expose tools
   - [x] `save_context(text, tags?, source?)`
-  - [ ] `search_context(query, limit?)`
+  - [x] `search_context(query, limit?)`
   - [x] `list_recent_context(limit?)`
-- [ ] Build SQL database and connect to exposed tools
-- To be continued...
-
-## Reference
-
-The full LLM runtime situation should look something like this:
-
-<p align=center>User prompt</p>
-<p align=center>↓</p>
-<p align=center>Conversation context</p>
-<p align=center>↓</p>
-<p align=center>System prompt</p>
-<p align=center>↓</p>
-<p align=center>Long-term static memories of user preferences, etc.</p>
-<p align=center>↓</p>
-<p align=center><b>This MCP layer</b> to fetch recent or trending context outside the current conversation</p>
+- [x] Build SQL database and connect to exposed tools
+- [ ] Build and expose `metadata` tool that returns db info
+- [ ] Branch the tool functions from `db.ts` into `tools.ts`
+- [ ] Build database housekeeping functions into `db.ts`
 
 ### File structure
 
@@ -78,9 +80,13 @@ $ tree --gitignore
 ├── README.md
 ├── src
 │   ├── index.ts
-│   └── mcp
-│       └── server.ts
+│   ├── mcp
+│   │   └── server.ts
+│   └── storage
+│       └── db.ts
 └── tsconfig.json
+
+4 directories, 7 files
 ```
 
 ### SQL structure

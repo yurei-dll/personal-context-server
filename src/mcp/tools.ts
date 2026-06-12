@@ -158,6 +158,23 @@ export async function listRecentContext(limit?: number) {
     return result.rows.map(mapContextRow);
 }
 
+export async function deleteContext(id: number) {
+    await initializeDatabase();
+
+    const result = await db.query<ContextRow>(
+        `
+            DELETE FROM contexts
+            WHERE id = $1
+            RETURNING id, kind, content, source, tags, created_at, updated_at
+        `,
+        [id]
+    );
+
+    const deletedContext = result.rows[0];
+
+    return deletedContext ? mapContextRow(deletedContext) : null;
+}
+
 export async function getDatabaseMetadata() {
     await initializeDatabase();
 

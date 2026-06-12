@@ -72,7 +72,7 @@ To get started, paste this into your MCP config:
 - [ ] Add new function in `db.ts` to purge super old entries after db init
 - [ ] Add housekeeping tools
   - [x] `database_metadata()`
-  - [ ] `delete_context(id)`
+  - [x] `delete_context(id)`
   - [ ] `update_context(id, text?, tags?, source?)`
   - [ ] `vacuum_database()` / maintenance helper
 - [ ] Add embedding-based semantic search
@@ -89,6 +89,7 @@ To get started, paste this into your MCP config:
 | `search_context` | Search saved context by text. Arguments: `query` (required string), `limit` (optional positive integer, defaults to `20`, capped at `100`). Searches content, source, and tags. | JSON text containing `{ "query": string, "limit": number, "results": context[] }`, ordered newest first. |
 | `list_recent_context` | Fetch recently saved context notes. Arguments: `limit` (optional positive integer, defaults to `20`, capped at `100`). | JSON text containing `{ "limit": number, "results": context[] }`, ordered newest first. |
 | `database_metadata` | Fetch simple database metadata. Takes no arguments. | JSON text containing row count, total database size, and table sizes for `contexts` and `embeddings`. |
+| `delete_context` | Delete a saved context note. Arguments: `id` (required positive integer). | JSON text containing `{ "id": number, "deleted": context \| null }`, where `deleted` is the removed record or `null` if no record matched. |
 
 `database_metadata` returns a shape like this:
 

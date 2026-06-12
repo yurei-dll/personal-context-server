@@ -80,6 +80,8 @@ To get started, paste this into your MCP config:
   - [ ] Store vectors in `embeddings`
   - [ ] Search by semantic similarity
 
+Consider adding confidence scores, async embeddings.
+
 ## Available tools
 
 | Tool | Usage | Result |

@@ -61,7 +61,7 @@ To get started, paste this into your MCP config:
 ## Roadmap
 
 - [x] Build basic MCP server
-- [x] Build and expose tools
+- [x] Build and expose basic tools
   - [x] `save_context(text, tags?, source?)`
   - [x] `search_context(query, limit?)`
   - [x] `list_recent_context(limit?)`
@@ -69,7 +69,16 @@ To get started, paste this into your MCP config:
 - [x] Build SQL database and connect to exposed tools
 - [x] Build and expose `database_metadata` tool that returns db info
 - [x] Branch the tool functions from `db.ts` into `tools.ts`
-- [ ] Build database housekeeping functions into `db.ts`
+- [ ] Add new function in `db.ts` to purge super old entries after db init
+- [ ] Add housekeeping tools
+  - [x] `database_metadata()`
+  - [ ] `delete_context(id)`
+  - [ ] `update_context(id, text?, tags?, source?)`
+  - [ ] `vacuum_database()` / maintenance helper
+- [ ] Add embedding-based semantic search
+  - [ ] Generate embeddings for saved contexts
+  - [ ] Store vectors in `embeddings`
+  - [ ] Search by semantic similarity
 
 ## Available tools
 

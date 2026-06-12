@@ -1,4 +1,4 @@
-#! /usr/bin/env node
+#!/usr/bin/env node
 // index.ts MCP server that handles stdio
 
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -11,4 +11,7 @@ async function main() {
     await server.connect(transport);
 }
 
-main().catch(console.error);
+main().catch((error: unknown) => {
+    console.error(error);
+    process.exitCode = 1;
+});

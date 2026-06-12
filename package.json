@@ -2,7 +2,7 @@
   "name": "personal-context-server",
   "version": "1.0.0",
   "description": "A personalized context-driven MCP archive server",
-  "main": "node dist/main.js",
+  "main": "dist/index.js",
   "type": "module",
   "scripts": {
     "dev": "tsx src/index.ts",

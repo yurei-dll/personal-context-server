@@ -44,12 +44,6 @@ The full LLM runtime situation should look something like this:
 
 ## Configuring
 
-Create a local `.env` from the example if you want to run the server directly:
-
-```bash
-cp .env.example .env
-```
-
 To get started, paste this into your MCP config:
 
 ```json
@@ -66,6 +60,12 @@ To get started, paste this into your MCP config:
   },
   "type": "stdio"
 }
+```
+
+Create a local `.env` from the example if you want to run the server directly:
+
+```bash
+cp .env.example .env
 ```
 
 ### Optional embedding config

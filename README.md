@@ -73,7 +73,6 @@ To get started, paste this into your MCP config:
 - [x] Build SQL database and connect to exposed tools
 - [x] Build and expose `database_metadata` tool that returns db info
 - [x] Branch the tool functions from `db.ts` into `tools.ts`
-- [ ] Add new function in `db.ts` to purge super old entries after db init
 - [ ] Add housekeeping tools
   - [x] `database_metadata()`
   - [x] `delete_context(id)`

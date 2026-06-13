@@ -18,6 +18,17 @@ export type EmbeddingSaveResult =
           dimensions: number;
       };
 
+export type EmbeddingGenerateResult =
+    | {
+          generated: false;
+          reason: "disabled" | "no_provider" | "provider_error";
+      }
+    | {
+          generated: true;
+          model: string;
+          vector: number[];
+      };
+
 async function saveEmbedding(contextId: number, model: string, vector: number[]) {
     await initializeDatabase();
 
@@ -38,45 +49,58 @@ async function saveEmbedding(contextId: number, model: string, vector: number[])
 export async function maybeSaveContextEmbedding(
     context: EmbeddableContext
 ): Promise<EmbeddingSaveResult> {
+    const embedding = await maybeGenerateEmbedding(context.content);
+
+    if (!embedding.generated) {
+        return {
+            saved: false,
+            reason: embedding.reason,
+        };
+    }
+
+    await saveEmbedding(context.id, embedding.model, embedding.vector);
+
+    return {
+        saved: true,
+        model: embedding.model,
+        dimensions: embedding.vector.length,
+    };
+}
+
+export async function maybeGenerateEmbedding(text: string): Promise<EmbeddingGenerateResult> {
     const config = getEmbeddingConfig();
 
     if (!config.enabled) {
         return {
-            saved: false,
+            generated: false,
             reason: "disabled",
         };
     }
 
     if (config.provider === "none") {
         return {
-            saved: false,
+            generated: false,
             reason: "no_provider",
         };
     }
 
-    let vector: number[];
-
     try {
-        vector = await generateOllamaEmbedding(
-            config.ollamaHost,
-            config.model,
-            context.content,
-            config.autoPull
-        );
+        return {
+            generated: true,
+            model: config.model,
+            vector: await generateOllamaEmbedding(
+                config.ollamaHost,
+                config.model,
+                text,
+                config.autoPull
+            ),
+        };
     } catch (error) {
         console.error(error instanceof Error ? error.message : error);
 
         return {
-            saved: false,
+            generated: false,
             reason: "provider_error",
         };
     }
-
-    await saveEmbedding(context.id, config.model, vector);
-
-    return {
-        saved: true,
-        model: config.model,
-        dimensions: vector.length,
-    };
 }

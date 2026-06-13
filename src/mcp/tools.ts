@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import { maybeGenerateEmbedding, maybeSaveContextEmbedding } from "../embeddings/index.js";
 import { db, initializeDatabase } from "../storage/db.js";
 
 export type ContextRecord = {
@@ -20,6 +21,11 @@ type ContextRow = {
     tags: string | string[] | null;
     created_at: string | Date;
     updated_at: string | Date;
+};
+
+type VectorSearchRow = ContextRow & {
+    model: string | null;
+    vector: unknown;
 };
 
 type DatabaseMetadataRow = {
@@ -131,6 +137,65 @@ function mapContextRow(row: ContextRow): ContextRecord {
     };
 }
 
+function parseEmbeddingVector(value: unknown) {
+    if (!value) {
+        return null;
+    }
+
+    if (
+        Array.isArray(value) &&
+        value.length > 0 &&
+        value.every((item) => typeof item === "number")
+    ) {
+        return value;
+    }
+
+    if (typeof value !== "string") {
+        return null;
+    }
+
+    try {
+        const parsedValue: unknown = JSON.parse(value);
+
+        if (
+            Array.isArray(parsedValue) &&
+            parsedValue.length > 0 &&
+            parsedValue.every((item) => typeof item === "number")
+        ) {
+            return parsedValue;
+        }
+    } catch {
+        return null;
+    }
+
+    return null;
+}
+
+function cosineSimilarity(left: number[], right: number[]) {
+    if (left.length !== right.length || left.length === 0) {
+        return null;
+    }
+
+    let dotProduct = 0;
+    let leftMagnitude = 0;
+    let rightMagnitude = 0;
+
+    for (let index = 0; index < left.length; index += 1) {
+        const leftValue = left[index];
+        const rightValue = right[index];
+
+        dotProduct += leftValue * rightValue;
+        leftMagnitude += leftValue * leftValue;
+        rightMagnitude += rightValue * rightValue;
+    }
+
+    if (leftMagnitude === 0 || rightMagnitude === 0) {
+        return null;
+    }
+
+    return dotProduct / (Math.sqrt(leftMagnitude) * Math.sqrt(rightMagnitude));
+}
+
 function cleanupExpiredPurgeConfirmations(now = new Date()) {
     for (const [token, pendingPurge] of pendingPurges) {
         if (pendingPurge.expiresAt <= now) {
@@ -174,13 +239,16 @@ export async function saveContext(text: string, tags?: string[], source?: string
         [text, source ?? null, tagValue, now]
     );
 
-    return mapContextRow(result.rows[0]);
+    const context = mapContextRow(result.rows[0]);
+
+    await maybeSaveContextEmbedding(context);
+
+    return context;
 }
 
-export async function searchContext(query: string, limit?: number) {
+async function searchContextByText(query: string, limit: number) {
     await initializeDatabase();
 
-    const resultLimit = normalizeLimit(limit);
     const searchPattern = `%${query}%`;
     const result = await db.query<ContextRow>(
         `
@@ -192,10 +260,81 @@ export async function searchContext(query: string, limit?: number) {
             ORDER BY created_at DESC, id DESC
             LIMIT $2
         `,
-        [searchPattern, resultLimit]
+        [searchPattern, limit]
     );
 
     return result.rows.map(mapContextRow);
+}
+
+async function searchContextByVector(query: string, limit: number) {
+    const embedding = await maybeGenerateEmbedding(query);
+
+    if (!embedding.generated) {
+        return null;
+    }
+
+    const result = await db.query<VectorSearchRow>(
+        `
+            SELECT
+                contexts.id,
+                contexts.kind,
+                contexts.content,
+                contexts.source,
+                contexts.tags,
+                contexts.created_at,
+                contexts.updated_at,
+                embeddings.model,
+                embeddings.vector
+            FROM contexts
+            INNER JOIN embeddings
+                ON embeddings.context_id = contexts.id
+            WHERE embeddings.model = $1
+              AND embeddings.vector IS NOT NULL
+        `,
+        [embedding.model]
+    );
+
+    const rankedResults = result.rows
+        .map((row) => {
+            const vector = parseEmbeddingVector(row.vector);
+            const similarity = vector ? cosineSimilarity(embedding.vector, vector) : null;
+
+            return similarity === null
+                ? null
+                : {
+                      context: mapContextRow(row),
+                      similarity,
+                  };
+        })
+        .filter((item): item is { context: ContextRecord; similarity: number } => item !== null)
+        .sort((left, right) => {
+            if (right.similarity !== left.similarity) {
+                return right.similarity - left.similarity;
+            }
+
+            if (right.context.created_at !== left.context.created_at) {
+                return right.context.created_at.localeCompare(left.context.created_at);
+            }
+
+            return right.context.id - left.context.id;
+        })
+        .slice(0, limit)
+        .map((item) => item.context);
+
+    return rankedResults.length > 0 ? rankedResults : null;
+}
+
+export async function searchContext(query: string, limit?: number) {
+    await initializeDatabase();
+
+    const resultLimit = normalizeLimit(limit);
+    const vectorResults = await searchContextByVector(query, resultLimit);
+
+    if (vectorResults) {
+        return vectorResults;
+    }
+
+    return searchContextByText(query, resultLimit);
 }
 
 export async function listRecentContext(limit?: number) {
@@ -278,7 +417,17 @@ export async function updateContext(
 
     const updatedContext = result.rows[0];
 
-    return updatedContext ? mapContextRow(updatedContext) : null;
+    if (!updatedContext) {
+        return null;
+    }
+
+    const context = mapContextRow(updatedContext);
+
+    if (hasText) {
+        await maybeSaveContextEmbedding(context);
+    }
+
+    return context;
 }
 
 export async function getDatabaseMetadata() {

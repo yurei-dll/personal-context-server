@@ -122,9 +122,16 @@ export async function initializeDatabase() {
     await db.query(`
         CREATE TABLE IF NOT EXISTS embeddings (
             context_id BIGINT PRIMARY KEY REFERENCES contexts(id) ON DELETE CASCADE,
-            vector TEXT
+            model TEXT,
+            vector TEXT,
+            created_at TIMESTAMPTZ,
+            updated_at TIMESTAMPTZ
         )
     `);
+
+    await db.query("ALTER TABLE embeddings ADD COLUMN IF NOT EXISTS model TEXT");
+    await db.query("ALTER TABLE embeddings ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ");
+    await db.query("ALTER TABLE embeddings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ");
 
     // Add indexes TODO: Test this part specifically
     await db.query(`

@@ -22,7 +22,6 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "pg": "^8.21.0",
-    "tsc": "^2.0.4",
     "zod": "^4.4.3"
   },
   "devDependencies": {

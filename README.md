@@ -70,19 +70,28 @@ cp .env.example .env
 
 ### Optional embedding config
 
-Embedding support is currently behind an environment toggle. The hook is wired into
-`save_context` and text-changing `update_context` calls, but no embedding provider is
-implemented yet.
+Embedding support is behind an environment toggle. Ollama is the default provider, but
+embeddings are disabled unless you explicitly enable them.
 
 ```bash
 EMBEDDINGS_ENABLED=false
-EMBEDDINGS_PROVIDER=none
-EMBEDDINGS_MODEL=
+EMBEDDINGS_PROVIDER=ollama
+EMBEDDINGS_MODEL=nomic-embed-text
+EMBEDDINGS_AUTO_PULL=true
+OLLAMA_HOST=http://127.0.0.1:11434
 ```
 
 When `EMBEDDINGS_ENABLED` is not `true`, context saves and updates skip embedding work.
-When it is `true` with `EMBEDDINGS_PROVIDER=none`, the embedding hook still no-ops until
-a real provider is added.
+To enable local embeddings with the defaults, set only:
+
+```bash
+EMBEDDINGS_ENABLED=true
+```
+
+With `EMBEDDINGS_AUTO_PULL=true`, the server asks Ollama to pull the configured model
+on first use if it is missing. First save can take longer while the model downloads.
+Set `EMBEDDINGS_AUTO_PULL=false` if you prefer to manage models yourself with
+`ollama pull`.
 
 ## Roadmap
 
@@ -104,8 +113,8 @@ a real provider is added.
   - [x] `vacuum_database()` / maintenance helper
 - [ ] Add embedding-based semantic search
   - [x] Add environment toggle and no-op embedding lifecycle hook
-  - [ ] Generate embeddings for saved contexts
-  - [ ] Store vectors in `embeddings`
+  - [x] Generate embeddings for saved contexts with Ollama
+  - [x] Store vectors in `embeddings`
   - [ ] Search by semantic similarity
 
 Consider adding confidence scores, async embeddings.
@@ -177,7 +186,9 @@ $ tree --gitignore
 │   ├── index.ts
 │   ├── embeddings
 │   │   ├── config.ts
-│   │   └── index.ts
+│   │   ├── index.ts
+│   │   └── providers
+│   │       └── ollama.ts
 │   ├── mcp
 │   │   ├── server.ts
 │   │   └── tools.ts
@@ -185,7 +196,7 @@ $ tree --gitignore
 │       └── db.ts
 └── tsconfig.json
 
-5 directories, 10 files
+6 directories, 11 files
 ```
 
 ### SQL structure
@@ -203,6 +214,9 @@ contexts (
 
 embeddings (
   context_id BIGINT PRIMARY KEY REFERENCES contexts(id) ON DELETE CASCADE,
-  vector TEXT
+  model TEXT,
+  vector TEXT,
+  created_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ
 )
 ```

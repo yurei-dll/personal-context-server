@@ -1,6 +1,13 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { deleteContext, getDatabaseMetadata, listRecentContext, saveContext, searchContext } from "./tools.js";
+import {
+    deleteContext,
+    getDatabaseMetadata,
+    listRecentContext,
+    saveContext,
+    searchContext,
+    updateContext,
+} from "./tools.js";
 
 export function createServer() {
     const server = new McpServer({
@@ -138,6 +145,34 @@ export function createServer() {
                         text: JSON.stringify({
                             id,
                             deleted,
+                        }),
+                    },
+                ],
+            };
+        }
+    );
+
+    server.registerTool(
+        "update_context",
+        {
+            description: "Update a saved personal context item by id.",
+            inputSchema: {
+                id: z.number().int().positive().describe("The id of the context item to update."),
+                text: z.string().min(1).optional().describe("Optional replacement context text."),
+                tags: z.array(z.string()).optional().describe("Optional replacement tags."),
+                source: z.string().optional().describe("Optional replacement source."),
+            },
+        },
+        async ({ id, text, tags, source }) => {
+            const updated = await updateContext(id, text, tags, source);
+
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: JSON.stringify({
+                            id,
+                            updated,
                         }),
                     },
                 ],

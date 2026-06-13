@@ -175,6 +175,56 @@ export async function deleteContext(id: number) {
     return deletedContext ? mapContextRow(deletedContext) : null;
 }
 
+export async function updateContext(
+    id: number,
+    text?: string,
+    tags?: string[],
+    source?: string
+) {
+    await initializeDatabase();
+
+    const hasText = text !== undefined;
+    const hasTags = tags !== undefined;
+    const hasSource = source !== undefined;
+
+    if (!hasText && !hasTags && !hasSource) {
+        throw new Error("At least one of text, tags, or source must be provided.");
+    }
+
+    const tagValue = hasTags
+        ? (await getTagsColumnType()) === "_text"
+            ? tags
+            : JSON.stringify(tags)
+        : null;
+
+    const result = await db.query<ContextRow>(
+        `
+            UPDATE contexts
+            SET
+                content = CASE WHEN $2 THEN $3 ELSE content END,
+                tags = CASE WHEN $4 THEN $5 ELSE tags END,
+                source = CASE WHEN $6 THEN $7 ELSE source END,
+                updated_at = $8
+            WHERE id = $1
+            RETURNING id, kind, content, source, tags, created_at, updated_at
+        `,
+        [
+            id,
+            hasText,
+            text ?? null,
+            hasTags,
+            tagValue,
+            hasSource,
+            source ?? null,
+            new Date().toISOString(),
+        ]
+    );
+
+    const updatedContext = result.rows[0];
+
+    return updatedContext ? mapContextRow(updatedContext) : null;
+}
+
 export async function getDatabaseMetadata() {
     await initializeDatabase();
 

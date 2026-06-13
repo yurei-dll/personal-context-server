@@ -77,7 +77,7 @@ To get started, paste this into your MCP config:
 - [ ] Add housekeeping tools
   - [x] `database_metadata()`
   - [x] `delete_context(id)`
-  - [ ] `update_context(id, text?, tags?, source?)`
+  - [x] `update_context(id, text?, tags?, source?)`
   - [ ] `vacuum_database()` / maintenance helper
 - [ ] Add embedding-based semantic search
   - [ ] Generate embeddings for saved contexts
@@ -96,6 +96,7 @@ Consider adding confidence scores, async embeddings.
 | `list_recent_context` | Fetch recently saved context notes. Arguments: `limit` (optional positive integer, defaults to `20`, capped at `100`). | JSON text containing `{ "limit": number, "results": context[] }`, ordered newest first. |
 | `database_metadata` | Fetch simple database metadata. Takes no arguments. | JSON text containing row count, total database size, and table sizes for `contexts` and `embeddings`. |
 | `delete_context` | Delete a saved context note. Arguments: `id` (required positive integer). | JSON text containing `{ "id": number, "deleted": context \| null }`, where `deleted` is the removed record or `null` if no record matched. |
+| `update_context` | Update a saved context note. Arguments: `id` (required positive integer), plus at least one of `text` (optional string), `tags` (optional string array), or `source` (optional string). | JSON text containing `{ "id": number, "updated": context \| null }`, where `updated` is the updated record or `null` if no record matched. |
 
 `database_metadata` returns a shape like this:
 

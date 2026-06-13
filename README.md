@@ -42,7 +42,7 @@ The full LLM runtime situation should look something like this:
 
 **Note:** Your mileage may vary _significantly_ depending on the instructions given to the model. This MCP server can provide relevant context, but it is ultimately up to the LLM to decide when to retrieve it, how to interpret it, and how much weight to give it.
 
----
+## Configuring
 
 To get started, paste this into your MCP config:
 
@@ -61,6 +61,22 @@ To get started, paste this into your MCP config:
   "type": "stdio"
 }
 ```
+
+### Optional embedding config
+
+Embedding support is currently behind an environment toggle. The hook is wired into
+`save_context` and text-changing `update_context` calls, but no embedding provider is
+implemented yet.
+
+```bash
+EMBEDDINGS_ENABLED=false
+EMBEDDINGS_PROVIDER=none
+EMBEDDINGS_MODEL=
+```
+
+When `EMBEDDINGS_ENABLED` is not `true`, context saves and updates skip embedding work.
+When it is `true` with `EMBEDDINGS_PROVIDER=none`, the embedding hook still no-ops until
+a real provider is added.
 
 ## Roadmap
 
@@ -81,6 +97,7 @@ To get started, paste this into your MCP config:
   - [x] `context_purge_confirm(before, confirmation_token, expected_count)`
   - [x] `vacuum_database()` / maintenance helper
 - [ ] Add embedding-based semantic search
+  - [x] Add environment toggle and no-op embedding lifecycle hook
   - [ ] Generate embeddings for saved contexts
   - [ ] Store vectors in `embeddings`
   - [ ] Search by semantic similarity

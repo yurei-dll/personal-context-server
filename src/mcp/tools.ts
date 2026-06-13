@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import { maybeSaveContextEmbedding } from "../embeddings/index.js";
 import { db, initializeDatabase } from "../storage/db.js";
 
 export type ContextRecord = {
@@ -174,7 +175,11 @@ export async function saveContext(text: string, tags?: string[], source?: string
         [text, source ?? null, tagValue, now]
     );
 
-    return mapContextRow(result.rows[0]);
+    const context = mapContextRow(result.rows[0]);
+
+    await maybeSaveContextEmbedding(context);
+
+    return context;
 }
 
 export async function searchContext(query: string, limit?: number) {
@@ -278,7 +283,17 @@ export async function updateContext(
 
     const updatedContext = result.rows[0];
 
-    return updatedContext ? mapContextRow(updatedContext) : null;
+    if (!updatedContext) {
+        return null;
+    }
+
+    const context = mapContextRow(updatedContext);
+
+    if (hasText) {
+        await maybeSaveContextEmbedding(context);
+    }
+
+    return context;
 }
 
 export async function getDatabaseMetadata() {

@@ -36,7 +36,11 @@ The full LLM runtime situation should look something like this:
 <p align=center>↓</p>
 <p align=center>Long-term static memories of user preferences, etc.</p>
 <p align=center>↓</p>
-<p align=center><b>This MCP layer</b> to fetch recent or trending context outside the current conversation</p>
+<p align=center><u>This MCP layer</u> to fetch recent or trending context outside the current conversation</p>
+
+**AI doesn't need to remember everything. It just needs to know where its memories are.**
+
+**Note:** Your mileage may vary _significantly_ depending on the instructions given to the model. This MCP server can provide relevant context, but it is ultimately up to the LLM to decide when to retrieve it, how to interpret it, and how much weight to give it.
 
 ---
 

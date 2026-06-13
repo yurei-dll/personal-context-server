@@ -2,6 +2,8 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import {
     deleteContext,
+    contextPurgeConfirm,
+    contextPurgePreview,
     getDatabaseMetadata,
     listRecentContext,
     saveContext,
@@ -174,6 +176,52 @@ export function createServer() {
                             id,
                             updated,
                         }),
+                    },
+                ],
+            };
+        }
+    );
+
+    server.registerTool(
+        "context_purge_preview",
+        {
+            description: "Preview how many context items would be deleted before a cutoff date. Run this before context_purge_confirm.",
+            inputSchema: {
+                before: z.string().min(1).describe("Delete preview cutoff. Context items created before this date or timestamp are counted."),
+            },
+        },
+        async ({ before }) => {
+            const preview = await contextPurgePreview(before);
+
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: JSON.stringify({ preview }),
+                    },
+                ],
+            };
+        }
+    );
+
+    server.registerTool(
+        "context_purge_confirm",
+        {
+            description: "Delete context items created before a cutoff date. Requires a recent confirmation token and expected count from context_purge_preview.",
+            inputSchema: {
+                before: z.string().min(1).describe("The exact cutoff date or timestamp used for context_purge_preview."),
+                confirmation_token: z.string().min(1).describe("Confirmation token returned by context_purge_preview."),
+                expected_count: z.number().int().nonnegative().describe("Matched count returned by context_purge_preview."),
+            },
+        },
+        async ({ before, confirmation_token, expected_count }) => {
+            const purge = await contextPurgeConfirm(before, confirmation_token, expected_count);
+
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: JSON.stringify({ purge }),
                     },
                 ],
             };

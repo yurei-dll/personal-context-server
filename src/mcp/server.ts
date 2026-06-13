@@ -9,6 +9,7 @@ import {
     saveContext,
     searchContext,
     updateContext,
+    vacuumDatabase,
 } from "./tools.js";
 
 export function createServer() {
@@ -222,6 +223,25 @@ export function createServer() {
                     {
                         type: "text",
                         text: JSON.stringify({ purge }),
+                    },
+                ],
+            };
+        }
+    );
+
+    server.registerTool(
+        "vacuum_database",
+        {
+            description: "Run database maintenance for the managed context tables and return metadata before and after vacuuming.",
+        },
+        async () => {
+            const vacuum = await vacuumDatabase();
+
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: JSON.stringify({ vacuum }),
                     },
                 ],
             };

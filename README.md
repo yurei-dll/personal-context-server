@@ -73,13 +73,13 @@ To get started, paste this into your MCP config:
 - [x] Build SQL database and connect to exposed tools
 - [x] Build and expose `database_metadata` tool that returns db info
 - [x] Branch the tool functions from `db.ts` into `tools.ts`
-- [ ] Add housekeeping tools
+- [x] Add housekeeping tools
   - [x] `database_metadata()`
   - [x] `delete_context(id)`
   - [x] `update_context(id, text?, tags?, source?)`
   - [x] `context_purge_preview(before)`
   - [x] `context_purge_confirm(before, confirmation_token, expected_count)`
-  - [ ] `vacuum_database()` / maintenance helper
+  - [x] `vacuum_database()` / maintenance helper
 - [ ] Add embedding-based semantic search
   - [ ] Generate embeddings for saved contexts
   - [ ] Store vectors in `embeddings`
@@ -100,6 +100,7 @@ Consider adding confidence scores, async embeddings.
 | `update_context` | Update a saved context note. Arguments: `id` (required positive integer), plus at least one of `text` (optional string), `tags` (optional string array), or `source` (optional string). | JSON text containing `{ "id": number, "updated": context \| null }`, where `updated` is the updated record or `null` if no record matched. |
 | `context_purge_preview` | Preview a deletion of saved context notes before a cutoff. Arguments: `before` (required date or timestamp). | JSON text containing `{ "preview": { "before": string, "matched": number, "oldest": string \| null, "newest": string \| null, "confirmation_token": string, "expires_at": string } }`. |
 | `context_purge_confirm` | Delete saved context notes before a cutoff. Arguments: `before` (required date or timestamp), `confirmation_token` (required string from `context_purge_preview`), and `expected_count` (required nonnegative integer from `context_purge_preview`). The real purge only runs shortly after a matching preview, and only if the current match count still equals `expected_count`. | JSON text containing `{ "purge": { "before": string, "expected_count": number, "deleted_count": number, "deleted": context[] } }`. |
+| `vacuum_database` | Run PostgreSQL maintenance for the managed tables. Takes no arguments. | JSON text containing `{ "vacuum": { "tables": ["contexts", "embeddings"], "before": metadata, "after": metadata } }`. |
 
 `database_metadata` returns a shape like this:
 

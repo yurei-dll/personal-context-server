@@ -32,6 +32,24 @@ type DatabaseMetadataRow = {
     embeddings_size_pretty: string;
 };
 
+type DatabaseMetadata = {
+    context_count: number;
+    total_size: {
+        bytes: number;
+        pretty: string;
+    };
+    tables: {
+        contexts: {
+            bytes: number;
+            pretty: string;
+        };
+        embeddings: {
+            bytes: number;
+            pretty: string;
+        };
+    };
+};
+
 type PurgePreviewRow = {
     matched: string;
     oldest: string | Date | null;
@@ -296,6 +314,23 @@ export async function getDatabaseMetadata() {
                 pretty: row?.embeddings_size_pretty ?? "0 bytes",
             },
         },
+    } satisfies DatabaseMetadata;
+}
+
+export async function vacuumDatabase() {
+    await initializeDatabase();
+
+    const before = await getDatabaseMetadata();
+
+    await db.query("VACUUM (ANALYZE) contexts");
+    await db.query("VACUUM (ANALYZE) embeddings");
+
+    const after = await getDatabaseMetadata();
+
+    return {
+        tables: ["contexts", "embeddings"],
+        before,
+        after,
     };
 }
 

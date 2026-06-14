@@ -62,7 +62,7 @@ export function createServer() {
     server.registerTool(
         "search_context",
         {
-            description: "Search saved personal context by query.",
+            description: "Primary semantic search for saved personal context by query. Uses embedding similarity when available and falls back to text search.",
             inputSchema: {
                 query: z.string().min(1).describe("The search query."),
                 limit: z.number().int().positive().optional().describe("Maximum number of context items to return."),

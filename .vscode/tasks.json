@@ -1,0 +1,52 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Database: Create",
+            "type": "process",
+            "command": "${workspaceFolder}/scripts/db.sh",
+            "args": ["create"],
+            "problemMatcher": []
+        },
+        {
+            "label": "Database: Status",
+            "type": "process",
+            "command": "${workspaceFolder}/scripts/db.sh",
+            "args": ["status"],
+            "problemMatcher": []
+        },
+        {
+            "label": "Database: Open psql",
+            "type": "process",
+            "command": "${workspaceFolder}/scripts/db.sh",
+            "args": ["shell"],
+            "problemMatcher": [],
+            "presentation": {
+                "focus": true,
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "Database: Reset",
+            "type": "process",
+            "command": "${workspaceFolder}/scripts/db.sh",
+            "args": ["reset"],
+            "problemMatcher": [],
+            "presentation": {
+                "focus": true,
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "Database: Drop",
+            "type": "process",
+            "command": "${workspaceFolder}/scripts/db.sh",
+            "args": ["drop"],
+            "problemMatcher": [],
+            "presentation": {
+                "focus": true,
+                "panel": "dedicated"
+            }
+        }
+    ]
+}

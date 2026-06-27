@@ -132,6 +132,10 @@ Set `EMBEDDINGS_AUTO_PULL=false` if you prefer to manage models yourself with
 
 Consider adding confidence scores, async embeddings.
 
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
 ## Available tools
 
 | Tool | Usage | Result |

@@ -68,6 +68,19 @@ Create a local `.env` from the example if you want to run the server directly:
 cp .env.example .env
 ```
 
+Create and manage the local PostgreSQL database with the included helper:
+
+```bash
+scripts/db.sh create
+scripts/db.sh status
+scripts/db.sh shell
+```
+
+The helper always manages a database named `personal_context`. It also supports
+`drop` and `reset` (with confirmation), and honors the standard PostgreSQL
+connection environment variables. The same commands are available from VS Code
+under **Tasks: Run Task** as the `Database: ...` tasks.
+
 ### Optional embedding config
 
 Embedding support is behind an environment toggle. Ollama is the default provider, but
@@ -118,6 +131,10 @@ Set `EMBEDDINGS_AUTO_PULL=false` if you prefer to manage models yourself with
   - [x] Search by semantic similarity with text fallback
 
 Consider adding confidence scores, async embeddings.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
 
 ## Available tools
 

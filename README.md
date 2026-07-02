@@ -129,8 +129,12 @@ Set `EMBEDDINGS_AUTO_PULL=false` if you prefer to manage models yourself with
   - [x] Generate embeddings for saved contexts with Ollama
   - [x] Store vectors in `embeddings`
   - [x] Search by semantic similarity with text fallback
-
-Consider adding confidence scores, async embeddings.
+- [ ] Improve search quality and control
+  - [ ] Add `search_context(query, limit?, sensitivity?)`
+    - `sensitivity` will tune the balance between broad recall and strict relevance.
+      Its scale, default, and text-fallback behavior still need to be designed.
+  - [ ] Return confidence or relevance scores with search results
+  - [ ] Evaluate asynchronous embedding generation
 
 ## License
 
@@ -142,7 +146,7 @@ This project is licensed under the [MIT License](LICENSE).
 | --- | --- | --- |
 | `ping` | Health check for the MCP server. Takes no arguments. | Text response: `Pong!` |
 | `save_context` | Save a new personal context note. Arguments: `text` (required string), `tags` (optional string array), `source` (optional string). | JSON text containing `{ "saved": context }`, where `context` is the saved record. |
-| `search_context` | Search saved context by semantic similarity when embeddings are enabled and usable, falling back to text search. Arguments: `query` (required string), `limit` (optional positive integer, defaults to `20`, capped at `100`). Text fallback searches content, source, and tags. | JSON text containing `{ "query": string, "limit": number, "results": context[] }`. Semantic results are ordered by similarity; fallback text results are ordered newest first. |
+| `search_context` | Search saved context by semantic similarity when embeddings are enabled and usable, falling back to text search. Arguments: `query` (required string), `limit` (optional positive integer, defaults to `20`, capped at `100`). Text fallback searches content, source, and tags. A future `sensitivity` parameter is tracked in the roadmap but is not implemented. | JSON text containing `{ "query": string, "limit": number, "results": context[] }`. Semantic results are ordered by similarity; fallback text results are ordered newest first. |
 | `list_recent_context` | Fetch recently saved context notes. Arguments: `limit` (optional positive integer, defaults to `20`, capped at `100`). | JSON text containing `{ "limit": number, "results": context[] }`, ordered newest first. |
 | `database_metadata` | Fetch simple database metadata. Takes no arguments. | JSON text containing row count, total database size, and table sizes for `contexts` and `embeddings`. |
 | `delete_context` | Delete a saved context note. Arguments: `id` (required positive integer). | JSON text containing `{ "id": number, "deleted": context \| null }`, where `deleted` is the removed record or `null` if no record matched. |

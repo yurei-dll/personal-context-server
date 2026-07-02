@@ -13,6 +13,8 @@ export type ContextRecord = {
     updated_at: string;
 };
 
+export type SearchSensitivity = "low" | "medium" | "high";
+
 type ContextRow = {
     id: number | string;
     kind: string;
@@ -70,6 +72,12 @@ type PendingPurge = {
 
 const DEFAULT_CONTEXT_LIMIT = 20;
 const MAX_CONTEXT_LIMIT = 100;
+const DEFAULT_SEARCH_SENSITIVITY: SearchSensitivity = "high";
+const SEARCH_SIMILARITY_THRESHOLDS: Record<SearchSensitivity, number> = {
+    low: 0.75,
+    medium: 0.5,
+    high: -1,
+};
 const PURGE_CONFIRMATION_TTL_MS = 10 * 60 * 1000;
 let tagsColumnType: string | undefined;
 const pendingPurges = new Map<string, PendingPurge>();
@@ -80,6 +88,12 @@ function normalizeLimit(limit?: number) {
     }
 
     return Math.min(Math.max(Math.trunc(limit), 1), MAX_CONTEXT_LIMIT);
+}
+
+export function similarityThresholdForSensitivity(
+    sensitivity: SearchSensitivity = DEFAULT_SEARCH_SENSITIVITY
+) {
+    return SEARCH_SIMILARITY_THRESHOLDS[sensitivity];
 }
 
 function parseTags(tags: string | string[] | null) {
@@ -266,7 +280,11 @@ async function searchContextByText(query: string, limit: number) {
     return result.rows.map(mapContextRow);
 }
 
-async function searchContextByVector(query: string, limit: number) {
+async function searchContextByVector(
+    query: string,
+    limit: number,
+    sensitivity: SearchSensitivity
+) {
     const embedding = await maybeGenerateEmbedding(query);
 
     if (!embedding.generated) {
@@ -294,6 +312,7 @@ async function searchContextByVector(query: string, limit: number) {
         [embedding.model]
     );
 
+    const similarityThreshold = similarityThresholdForSensitivity(sensitivity);
     const rankedResults = result.rows
         .map((row) => {
             const vector = parseEmbeddingVector(row.vector);
@@ -307,6 +326,7 @@ async function searchContextByVector(query: string, limit: number) {
                   };
         })
         .filter((item): item is { context: ContextRecord; similarity: number } => item !== null)
+        .filter((item) => item.similarity >= similarityThreshold)
         .sort((left, right) => {
             if (right.similarity !== left.similarity) {
                 return right.similarity - left.similarity;
@@ -324,11 +344,15 @@ async function searchContextByVector(query: string, limit: number) {
     return rankedResults.length > 0 ? rankedResults : null;
 }
 
-export async function searchContext(query: string, limit?: number) {
+export async function searchContext(
+    query: string,
+    limit?: number,
+    sensitivity: SearchSensitivity = DEFAULT_SEARCH_SENSITIVITY
+) {
     await initializeDatabase();
 
     const resultLimit = normalizeLimit(limit);
-    const vectorResults = await searchContextByVector(query, resultLimit);
+    const vectorResults = await searchContextByVector(query, resultLimit, sensitivity);
 
     if (vectorResults) {
         return vectorResults;

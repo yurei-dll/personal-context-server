@@ -62,14 +62,16 @@ export function createServer() {
     server.registerTool(
         "search_context",
         {
-            description: "Primary semantic search for saved personal context by query. Uses embedding similarity when available and falls back to text search.",
+            description: "Primary semantic search for saved personal context by query. Uses embedding similarity when available and falls back to literal text search. Sensitivity controls how readily weaker semantic matches are included.",
             inputSchema: {
                 query: z.string().min(1).describe("The search query."),
                 limit: z.number().int().positive().optional().describe("Maximum number of context items to return."),
+                sensitivity: z.enum(["low", "medium", "high"]).optional().describe("Semantic recall level: low returns only strong matches, medium admits moderate matches, and high (default) preserves broad retrieval. This does not change literal text fallback matching."),
             },
         },
-        async ({ query, limit }) => {
-            const results = await searchContext(query, limit);
+        async ({ query, limit, sensitivity }) => {
+            const effectiveSensitivity = sensitivity ?? "high";
+            const results = await searchContext(query, limit, effectiveSensitivity);
 
             return {
                 content: [
@@ -78,6 +80,7 @@ export function createServer() {
                         text: JSON.stringify({
                             query,
                             limit: limit ?? 20,
+                            sensitivity: effectiveSensitivity,
                             results,
                         }),
                     },
